@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tumaris AI - Чат</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0B0C0E 0%, #1a1b1e 100%);
+            color: #fff;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: rgba(0, 255, 250, 0.1);
+            border: 1px solid rgba(0, 255, 250, 0.3);
+            border-radius: 20px;
+            padding: 20px 30px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .ai-avatar {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #00FFFA, #00D4FF);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .header-info h1 {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #00FFFA, #00D4FF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+        }
+
+        .header-info p {
+            color: #888;
+            font-size: 14px;
+        }
+
+        .status {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            background: #00FF88;
+            border-radius: 50%;
+            animation: blink 1.5s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .chat-container {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 20px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .chat-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-container::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .chat-container::-webkit-scrollbar-thumb {
+            background: rgba(0, 255, 250, 0.3);
+            border-radius: 10px;
+        }
+
+        .message {
+            display: flex;
+            gap: 15px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .message.ai .message-avatar {
+            background: linear-gradient(135deg, #00FFFA, #00D4FF);
+        }
+
+        .message.user .message-avatar {
+            background: linear-gradient(135deg, #FF6B9D, #C06C84);
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 15px 20px;
+            border-radius: 18px;
+            line-height: 1.6;
+        }
+
+        .message.ai .message-content {
+            background: rgba(0, 255, 250, 0.1);
+            border: 1px solid rgba(0, 255, 250, 0.2);
+        }
+
+        .message.user .message-content {
+            background: rgba(255, 107, 157, 0.1);
+            border: 1px solid rgba(255, 107, 157, 0.2);
+        }
+
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 15px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .typing-indicator.active {
+            display: flex;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 5px;
+            padding: 15px 20px;
+            background: rgba(0, 255, 250, 0.1);
+            border: 1px solid rgba(0, 255, 250, 0.2);
+            border-radius: 18px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: #00FFFA;
+            border-radius: 50%;
+            animation: typingDot 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typingDot {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.7; }
+            30% { transform: translateY(-10px); opacity: 1; }
+        }
+
+        .input-container {
+            display: flex;
+            gap: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 15px 20px;
+        }
+
+        .language-selector {
+            display: flex;
+            gap: 10px;
+        }
+
+        .lang-btn {
+            background: rgba(0, 255, 250, 0.1);
+            border: 1px solid rgba(0, 255, 250, 0.2);
+            color: #00FFFA;
+            padding: 10px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .lang-btn:hover {
+            background: rgba(0, 255, 250, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .lang-btn.active {
+            background: linear-gradient(135deg, #00FFFA, #00D4FF);
+            color: #000;
+            font-weight: 600;
+        }
+
+        #userInput {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 16px;
+            outline: none;
+            font-family: inherit;
+        }
+
+        #userInput::placeholder {
+            color: #666;
+        }
+
+        #sendBtn {
+            background: linear-gradient(135deg, #00FFFA, #00D4FF);
+            border: none;
+            color: #000;
+            padding: 12px 30px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+        }
+
+        #sendBtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 255, 250, 0.4);
+        }
+
+        #sendBtn:active {
+            transform: translateY(0);
+        }
+
+        #sendBtn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .welcome-message {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+
+        .welcome-message h2 {
+            color: #00FFFA;
+            margin-bottom: 10px;
+        }
+
+        .error-message {
+            background: rgba(255, 0, 0, 0.1);
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            color: #ff6b6b;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="ai-avatar">🤖</div>
+            <div class="header-info">
+                <h1>Tumaris AI</h1>
+                <p>Умный ассистент с поддержкой каракалпакского языка</p>
+            </div>
+            <div class="status">
+                <div class="status-dot"></div>
+                <span id="statusText">Онлайн</span>
+            </div>
+        </div>
+
+        <div class="chat-container" id="chatContainer">
+            <div class="welcome-message">
+                <h2>🎉 Добро пожаловать!</h2>
+                <p>Я - Tumaris AI. Могу общаться на русском, английском и каракалпакском языках.</p>
+                <p>Выберите язык и начните общение!</p>
+            </div>
+        </div>
+
+        <div class="input-container">
+            <div class="language-selector">
+                <button class="lang-btn active" data-lang="ru" title="Русский">🇷🇺 RU</button>
+                <button class="lang-btn" data-lang="en" title="English">🇬🇧 EN</button>
+                <button class="lang-btn" data-lang="karakalpak" title="Қарақалпақша">🇺🇿 QQ</button>
+            </div>
+            <input
+                type="text"
+                id="userInput"
+                placeholder="Напишите сообщение..."
+                autocomplete="off"
+            />
+            <button id="sendBtn">Отправить</button>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api/v1/process';
+        let currentLanguage = 'ru';
+
+        const chatContainer = document.getElementById('chatContainer');
+        const userInput = document.getElementById('userInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const statusText = document.getElementById('statusText');
+        const langBtns = document.querySelectorAll('.lang-btn');
+
+        // Выбор языка
+        langBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                langBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentLanguage = btn.dataset.lang;
+
+                const placeholders = {
+                    'ru': 'Напишите сообщение...',
+                    'en': 'Type a message...',
+                    'karakalpak': 'Хабар жазың...'
+                };
+                userInput.placeholder = placeholders[currentLanguage];
+            });
+        });
+
+        // Отправка сообщения
+        async function sendMessage() {
+            const message = userInput.value.trim();
+            if (!message) return;
+
+            // Добавить сообщение пользователя
+            addMessage(message, 'user');
+            userInput.value = '';
+            sendBtn.disabled = true;
+
+            // Показать индикатор печати
+            showTypingIndicator();
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        type: 'text',
+                        content: message,
+                        language: currentLanguage,
+                        max_tokens: 300,
+                        temperature: 0.7
+                    })
+                });
+
+                const data = await response.json();
+
+                hideTypingIndicator();
+
+                if (data.status === 'success') {
+                    // Анимированный вывод ответа
+                    await typeMessage(data.response, 'ai');
+                } else {
+                    addMessage('Извините, произошла ошибка. Попробуйте еще раз.', 'ai');
+                }
+            } catch (error) {
+                hideTypingIndicator();
+                addMessage('❌ Не удалось подключиться к серверу. Убедитесь что кластер запущен.', 'ai');
+                console.error('Error:', error);
+            } finally {
+                sendBtn.disabled = false;
+            }
+        }
+
+        // Добавить сообщение
+        function addMessage(text, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.textContent = sender === 'ai' ? '🤖' : '👤';
+
+            const content = document.createElement('div');
+            content.className = 'message-content';
+            content.textContent = text;
+
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(content);
+
+            // Удалить welcome message если есть
+            const welcome = chatContainer.querySelector('.welcome-message');
+            if (welcome) welcome.remove();
+
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        // Анимированный вывод (печатает по буквам)
+        async function typeMessage(text, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.textContent = sender === 'ai' ? '🤖' : '👤';
+
+            const content = document.createElement('div');
+            content.className = 'message-content';
+            content.textContent = '';
+
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(content);
+
+            const welcome = chatContainer.querySelector('.welcome-message');
+            if (welcome) welcome.remove();
+
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            // Печатать по буквам
+            for (let i = 0; i < text.length; i++) {
+                content.textContent += text[i];
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+                await new Promise(resolve => setTimeout(resolve, 20)); // 20ms между буквами
+            }
+        }
+
+        // Показать индикатор печати
+        function showTypingIndicator() {
+            const indicator = document.createElement('div');
+            indicator.className = 'typing-indicator active';
+            indicator.id = 'typingIndicator';
+
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.style.background = 'linear-gradient(135deg, #00FFFA, #00D4FF)';
+            avatar.textContent = '🤖';
+
+            const dots = document.createElement('div');
+            dots.className = 'typing-dots';
+            dots.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+
+            indicator.appendChild(avatar);
+            indicator.appendChild(dots);
+
+            chatContainer.appendChild(indicator);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        // Скрыть индикатор печати
+        function hideTypingIndicator() {
+            const indicator = document.getElementById('typingIndicator');
+            if (indicator) indicator.remove();
+        }
+
+        // События
+        sendBtn.addEventListener('click', sendMessage);
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        // Проверка статуса сервера
+        async function checkStatus() {
+            try {
+                const response = await fetch('http://localhost:3000/health');
+                const data = await response.json();
+                if (data.status === 'ok') {
+                    statusText.textContent = 'Онлайн';
+                    statusText.style.color = '#00FF88';
+                }
+            } catch (error) {
+                statusText.textContent = 'Оффлайн';
+                statusText.style.color = '#ff6b6b';
+            }
+        }
+
+        // Проверять статус каждые 5 секунд
+        checkStatus();
+        setInterval(checkStatus, 5000);
+    </script>
+</body>
+</html>

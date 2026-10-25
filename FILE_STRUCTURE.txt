@@ -1,0 +1,67 @@
+D:\Project\
+├── Router\
+│   ├── server.js
+│   ├── package.json
+│   └── .gitignore
+│
+├── Ear\
+│   ├── service.py
+│   ├── requirements.txt
+│   ├── .gitignore
+│   ├── adapter_model.safetensors
+│   ├── adapter_config.json
+│   ├── tokenizer files
+│   └── .cache\
+│
+├── Brain\
+│   ├── service.py
+│   ├── requirements.txt
+│   ├── .gitignore
+│   ├── qwen2.5-3b-instruct-q4_k_m.gguf
+│   └── .cache\
+│
+├── Styler\
+│   ├── service.py
+│   ├── requirements.txt
+│   ├── .gitignore
+│   ├── adapter_model.safetensors
+│   ├── adapter_config.json
+│   ├── tokenizer files
+│   └── .cache\
+│
+├── Voice\
+│   ├── service.py
+│   ├── requirements.txt
+│   ├── .gitignore
+│   ├── model.safetensors
+│   ├── config.json
+│   ├── tokenizer files
+│   ├── outputs\
+│   └── .cache\
+│
+├── logs\
+│   └── (generated log files)
+│
+├── install.bat
+├── start_cluster.bat
+├── stop_cluster.bat
+├── monitor.bat
+├── run_demo.bat
+├── run_client.bat
+├── run_diagnostics.bat
+│
+├── client.py
+├── test_cluster.py
+├── quick_test.py
+├── benchmark.py
+├── diagnostics.py
+├── collect_logs.py
+│
+├── README.md
+├── QUICKSTART.md
+├── ARCHITECTURE.md
+├── DEVELOPMENT.md
+├── TROUBLESHOOTING.md
+├── CHANGELOG.md
+├── cluster_config.json
+└── API_EXAMPLES.json

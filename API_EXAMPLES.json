@@ -1,0 +1,176 @@
+{
+  "api_examples": {
+    "text_processing": {
+      "endpoint": "POST http://localhost:3000/api/v1/process",
+      "description": "Process text through the appropriate pipeline",
+      "examples": [
+        {
+          "name": "Russian text (general language)",
+          "request": {
+            "type": "text",
+            "content": "Что такое нейронные сети?",
+            "language": "ru",
+            "max_tokens": 512,
+            "temperature": 0.7
+          },
+          "curl": "curl -X POST http://localhost:3000/api/v1/process -H \"Content-Type: application/json\" -d '{\"type\":\"text\",\"content\":\"Что такое нейронные сети?\",\"language\":\"ru\"}'"
+        },
+        {
+          "name": "Karakalpak text with styling",
+          "request": {
+            "type": "text",
+            "content": "Сәлем, қалайсыз? Мен сизге көмек етейин.",
+            "language": "karakalpak",
+            "max_tokens": 512,
+            "temperature": 0.7
+          },
+          "curl": "curl -X POST http://localhost:3000/api/v1/process -H \"Content-Type: application/json\" -d '{\"type\":\"text\",\"content\":\"Сәлем, қалайсыз?\",\"language\":\"karakalpak\"}'"
+        },
+        {
+          "name": "Karakalpak with speech synthesis",
+          "request": {
+            "type": "text",
+            "content": "Бул өте жақсы жұмыс",
+            "language": "karakalpak",
+            "synthesize_speech": true,
+            "max_tokens": 256,
+            "temperature": 0.7
+          },
+          "curl": "curl -X POST http://localhost:3000/api/v1/process -H \"Content-Type: application/json\" -d '{\"type\":\"text\",\"content\":\"Бул өте жақсы жұмыс\",\"language\":\"karakalpak\",\"synthesize_speech\":true}'"
+        },
+        {
+          "name": "Auto language detection",
+          "request": {
+            "type": "text",
+            "content": "Қайырлы күн!",
+            "language": "auto"
+          },
+          "curl": "curl -X POST http://localhost:3000/api/v1/process -H \"Content-Type: application/json\" -d '{\"type\":\"text\",\"content\":\"Қайырлы күн!\",\"language\":\"auto\"}'"
+        }
+      ]
+    },
+    "audio_transcription": {
+      "endpoint": "POST http://localhost:3000/api/v1/process",
+      "description": "Transcribe audio and process through pipeline",
+      "example": {
+        "name": "Audio file transcription",
+        "request_type": "multipart/form-data",
+        "fields": {
+          "type": "audio",
+          "audio": "file upload",
+          "language": "karakalpak"
+        },
+        "curl": "curl -X POST http://localhost:3000/api/v1/process -F \"type=audio\" -F \"audio=@audio.wav\" -F \"language=karakalpak\""
+      }
+    },
+    "direct_node_access": {
+      "ear_service": {
+        "endpoint": "POST http://localhost:8001/transcribe",
+        "description": "Direct speech-to-text transcription",
+        "request_type": "multipart/form-data",
+        "curl": "curl -X POST http://localhost:8001/transcribe -F \"file=@audio.wav\""
+      },
+      "brain_service": {
+        "endpoint": "POST http://localhost:8002/generate",
+        "description": "Direct text generation",
+        "request": {
+          "prompt": "Explain quantum computing",
+          "max_tokens": 512,
+          "temperature": 0.7,
+          "top_p": 0.9,
+          "repeat_penalty": 1.1
+        },
+        "curl": "curl -X POST http://localhost:8002/generate -H \"Content-Type: application/json\" -d '{\"prompt\":\"Explain quantum computing\",\"max_tokens\":512}'"
+      },
+      "styler_service": {
+        "endpoint": "POST http://localhost:8003/style",
+        "description": "Grammar and style correction for Karakalpak",
+        "request": {
+          "text": "каракалпакский текст для коррекции"
+        },
+        "curl": "curl -X POST http://localhost:8003/style -H \"Content-Type: application/json\" -d '{\"text\":\"текст для коррекции\"}'"
+      },
+      "voice_service": {
+        "endpoint": "POST http://localhost:8004/synthesize",
+        "description": "Text-to-speech synthesis",
+        "request": {
+          "text": "Текст для озвучки",
+          "speaker_id": 0,
+          "speed": 1.0
+        },
+        "curl": "curl -X POST http://localhost:8004/synthesize -H \"Content-Type: application/json\" -d '{\"text\":\"Текст для озвучки\"}'"
+      }
+    },
+    "health_checks": {
+      "description": "Check service availability",
+      "endpoints": [
+        {
+          "service": "Router",
+          "url": "GET http://localhost:3000/health",
+          "curl": "curl http://localhost:3000/health"
+        },
+        {
+          "service": "Ear",
+          "url": "GET http://localhost:8001/health",
+          "curl": "curl http://localhost:8001/health"
+        },
+        {
+          "service": "Brain",
+          "url": "GET http://localhost:8002/health",
+          "curl": "curl http://localhost:8002/health"
+        },
+        {
+          "service": "Styler",
+          "url": "GET http://localhost:8003/health",
+          "curl": "curl http://localhost:8003/health"
+        },
+        {
+          "service": "Voice",
+          "url": "GET http://localhost:8004/health",
+          "curl": "curl http://localhost:8004/health"
+        }
+      ]
+    }
+  },
+  "response_formats": {
+    "successful_response": {
+      "status": "success",
+      "input_text": "Original input text",
+      "processed_text": "Styled/corrected text (if applicable)",
+      "response": "Generated response from Brain",
+      "language": "karakalpak | general",
+      "audio_url": "/static/output.wav (if synthesized)"
+    },
+    "error_response": {
+      "status": "error",
+      "message": "Error description",
+      "details": "Additional error information"
+    }
+  },
+  "language_codes": {
+    "auto": "Automatic detection",
+    "karakalpak": "Karakalpak language (full pipeline)",
+    "ru": "Russian",
+    "en": "English",
+    "kk": "Kazakh"
+  },
+  "processing_pipelines": {
+    "karakalpak_text": [
+      "Router receives request",
+      "Styler corrects grammar/style",
+      "Brain generates response",
+      "Voice synthesizes (optional)"
+    ],
+    "karakalpak_audio": [
+      "Router receives audio",
+      "Ear transcribes to text",
+      "Styler corrects grammar/style",
+      "Brain generates response",
+      "Voice synthesizes (optional)"
+    ],
+    "general_language": [
+      "Router receives request",
+      "Brain generates response"
+    ]
+  }
+}

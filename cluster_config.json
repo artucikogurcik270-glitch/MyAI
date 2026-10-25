@@ -1,0 +1,117 @@
+{
+  "cluster": {
+    "name": "Tumaris",
+    "version": "1.0.0",
+    "architecture": "bee-hive microservices",
+    "deployment": "local",
+    "os": "Windows"
+  },
+  "nodes": [
+    {
+      "id": 1,
+      "name": "Router",
+      "type": "gateway",
+      "technology": "Node.js",
+      "port": 3000,
+      "endpoints": {
+        "process": "/api/v1/process",
+        "health": "/health"
+      }
+    },
+    {
+      "id": 2,
+      "name": "Ear",
+      "type": "stt",
+      "technology": "Python",
+      "port": 8001,
+      "model": {
+        "name": "Whisper Large V3 LoRA",
+        "path": "D:\\Project\\Ear",
+        "type": "speech-to-text",
+        "language": "karakalpak"
+      },
+      "endpoints": {
+        "transcribe": "/transcribe",
+        "health": "/health"
+      }
+    },
+    {
+      "id": 3,
+      "name": "Brain",
+      "type": "llm",
+      "technology": "Python",
+      "port": 8002,
+      "model": {
+        "name": "Qwen 2.5 3B Instruct Q4_K_M",
+        "path": "D:\\Project\\Brain\\qwen2.5-3b-instruct-q4_k_m.gguf",
+        "type": "language-model",
+        "quantization": "Q4_K_M",
+        "size_gb": 2.0
+      },
+      "endpoints": {
+        "generate": "/generate",
+        "health": "/health"
+      }
+    },
+    {
+      "id": 4.1,
+      "name": "Styler",
+      "type": "grammar",
+      "technology": "Python",
+      "port": 8003,
+      "model": {
+        "name": "Qwen 2.5 3B Karakalpak Base",
+        "path": "D:\\Project\\Styler",
+        "type": "text-correction",
+        "language": "karakalpak"
+      },
+      "endpoints": {
+        "style": "/style",
+        "health": "/health"
+      }
+    },
+    {
+      "id": 4.2,
+      "name": "Voice",
+      "type": "tts",
+      "technology": "Python",
+      "port": 8004,
+      "model": {
+        "name": "OmniVoice Karakalpak",
+        "path": "D:\\Project\\Voice",
+        "type": "text-to-speech",
+        "language": "karakalpak"
+      },
+      "endpoints": {
+        "synthesize": "/synthesize",
+        "health": "/health"
+      }
+    }
+  ],
+  "processing_pipelines": {
+    "karakalpak_text": [
+      "Router",
+      "Styler",
+      "Brain",
+      "Voice (optional)"
+    ],
+    "karakalpak_audio": [
+      "Router",
+      "Ear",
+      "Styler",
+      "Brain",
+      "Voice (optional)"
+    ],
+    "general_language": [
+      "Router",
+      "Brain"
+    ]
+  },
+  "system_requirements": {
+    "ram_gb": 12,
+    "storage_gb": 15,
+    "cpu_cores": 8,
+    "gpu": "optional",
+    "os": "Windows 10/11"
+  }
+}
